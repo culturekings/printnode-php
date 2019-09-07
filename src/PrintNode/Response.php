@@ -3,57 +3,64 @@
 namespace PrintNode;
 
 /**
- * Response
+ * Response.
  *
  * HTTP response object.
  */
 class Response
 {
     /**
-     * Original Request URL
+     * Original Request URL.
+     *
      * @var string
      */
     private $url;
 
     /**
-     * Response headers
+     * Response headers.
+     *
      * @var mixed[]
      */
     private $headers;
 
     /**
-     * Response body
+     * Response body.
+     *
      * @var string
      */
     private $content;
 
     /**
      * Extract the HTTP status code and message
-     * from the Response headers
+     * from the Response headers.
+     *
      * @param void
+     *
      * @return mixed[]
      */
     private function getStatus()
     {
-        if (!($statusArray = preg_grep('/^HTTP\/(1.0|1.1)\s+(\d+)\s+(.+)/', $this->headers))) {
+        if (! ($statusArray = preg_grep('/^HTTP\/(1.0|1.1)\s+(\d+)\s+(.+)/', $this->headers))) {
             throw new \RuntimeException('Could not determine HTTP status from API response');
         }
 
-        if (!preg_match('/^HTTP\/(1.0|1.1)\s+(\d+)\s+(.+)/', $statusArray[0], $matchesArray)) {
+        if (! preg_match('/^HTTP\/(1.0|1.1)\s+(\d+)\s+(.+)/', $statusArray[0], $matchesArray)) {
             throw new \RuntimeException('Could not determine HTTP status from API response');
         }
 
-        return array(
+        return [
             'code' => $matchesArray[2],
             'message' => $matchesArray[3],
-        );
+        ];
     }
 
     /**
-     * Constructor
+     * Constructor.
+     *
      * @param mixed $url
      * @param mixed $content
      * @param mixed $headers
+     *
      * @return Response
      */
     public function __construct($url, $content, array $headers)
@@ -64,8 +71,10 @@ class Response
     }
 
     /**
-     * Get Response body
+     * Get Response body.
+     *
      * @param void
+     *
      * @return string
      */
     public function getContent()
@@ -74,8 +83,10 @@ class Response
     }
 
     /**
-     * Get Response headers
+     * Get Response headers.
+     *
      * @param void
+     *
      * @return mixed[]
      */
     public function getHeaders()
@@ -84,8 +95,10 @@ class Response
     }
 
     /**
-     * Get Response body decoded into an array
+     * Get Response body decoded into an array.
+     *
      * @param void
+     *
      * @return mixed
      */
     public function getDecodedContent()
@@ -94,24 +107,30 @@ class Response
     }
 
     /**
-     * Get HTTP status code
+     * Get HTTP status code.
+     *
      * @param void
+     *
      * @return string
      */
     public function getStatusCode()
     {
         $status = $this->getStatus();
+
         return $status['code'];
     }
 
     /**
-     * Get HTTP status code
+     * Get HTTP status code.
+     *
      * @param void
+     *
      * @return string
      */
     public function getStatusMessage()
     {
         $status = $this->getStatus();
+
         return $status['message'];
     }
 }

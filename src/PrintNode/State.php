@@ -3,31 +3,43 @@
 namespace PrintNode;
 
 /**
- * State
+ * State.
  *
  * Object representing a State in PrintNode API
  *
- * @property-read int $printJobId
- * @property-read string $state
- * @property-read string $message
- * @property-read object $data
- * @property-read string $clientVersion
- * @property-read DateTime $createTimestamp
- * @property-read int $age
+ * @property int      $printJobId
+ * @property string   $state
+ * @property string   $message
+ * @property object   $data
+ * @property string   $clientVersion
+ * @property DateTime $createTimestamp
+ * @property int      $age
  */
 class State extends Entity
 {
+    /** @var int */
     protected $printJobId;
+
+    /** @var string */
     protected $state;
+
+    /** @var string */
     protected $message;
+
+    /** @var object */
     protected $data;
+
+    /** @var string */
     protected $clientVersion;
+
+    /** @var DateTime */
     protected $createTimestamp;
+
+    /** @var int */
     protected $age;
 
-    public function foreignKeyEntityMap()
+    public function foreignKeyEntityMap(): array
     {
-        return array(
-        );
+        return [];
     }
 }

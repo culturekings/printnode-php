@@ -3,27 +3,27 @@
 namespace PrintNode;
 
 /**
- * Whoami
+ * Whoami.
  *
  * Object representing a Whoami request in PrintNode API
  *
- * @property-read int $id
- * @property-read string $firstname
- * @property-read string $lastname
- * @property-read string $email
- * @property-read bool $canCreateSubAccounts
- * @property-read string $creatorEmail
- * @property-read string $creatorRef
- * @property-read int[] $childAccounts
- * @property-read string $credits
- * @property-read int $numComputers
- * @property-read int $totalprints
- * @property-read string[] $versions
- * @property-read int[] $connected
- * @property-read string[] $Tags
- * @property-read string[] $ApiKeys
- * @property-read string $state
- * @property-read string[] $permissions
+ * @property int      $id
+ * @property string   $firstname
+ * @property string   $lastname
+ * @property string   $email
+ * @property bool     $canCreateSubAccounts
+ * @property string   $creatorEmail
+ * @property string   $creatorRef
+ * @property int[]    $childAccounts
+ * @property string   $credits
+ * @property int      $numComputers
+ * @property int      $totalprints
+ * @property string[] $versions
+ * @property int[]    $connected
+ * @property string[] $Tags
+ * @property string[] $ApiKeys
+ * @property string   $state
+ * @property string[] $permissions
  */
 class Whoami extends Entity
 {
@@ -47,6 +47,6 @@ class Whoami extends Entity
 
     public function foreignKeyEntityMap()
     {
-        return array();
+        return [];
     }
 }

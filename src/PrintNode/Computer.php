@@ -3,40 +3,60 @@
 namespace PrintNode;
 
 /**
- * PrintNode_Computer
+ * PrintNode_Computer.
  *
  * Object representing a Computer in PrintNode API
  *
- * @property-read int $id
- * @property-read string $name
- * @property-read string $inet
- * @property-read string $inet6
- * @property-read string $version
- * @property-read string $jre
- * @property-read object $systemInfo
- * @property-read boolean $acceptOfflinePrintJobs
- * @property-read DateTime $createTimestamp
- * @property-read string $state
+ * @property int      $id
+ * @property string   $name
+ * @property string   $inet
+ * @property string   $inet6
+ * @property string   $version
+ * @property string   $jre
+ * @property object   $systemInfo
+ * @property bool     $acceptOfflinePrintJobs
+ * @property DateTime $createTimestamp
+ * @property string   $state
  */
 class Computer extends Entity
 {
+    /** @var int */
     protected $id;
+
+    /** @var string */
     protected $name;
+
+    /** @var string */
     protected $inet;
+
+    /** @var string */
     protected $inet6;
+
+    /** @var string */
     protected $hostname;
+
+    /** @var string */
     protected $version;
+
+    /** @var string */
     protected $jre;
+
+    /** @var object */
     protected $systemInfo;
+    /** @var bool */
     protected $acceptOfflinePrintJobs;
+
+    /** @var DateTime */
     protected $createTimestamp;
+
+    /** @var string */
     protected $state;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function foreignKeyEntityMap()
+    public function foreignKeyEntityMap(): array
     {
-        return array();
+        return [];
     }
 }

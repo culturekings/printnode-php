@@ -3,18 +3,23 @@
 namespace PrintNode;
 
 /**
- * Account
+ * Account.
  *
  * Object representing an Account to POST in PrintNode API
  *
- * @property-read string[string] $Account
- * @property-read string[] $ApiKeys
- * @property-read string[string] $Tags
+ * @property string[string] $Account
+ * @property string[]       $ApiKeys
+ * @property string[string] $Tags
  */
 class Account extends Entity
 {
+    /** @var array */
     protected $Account;
+
+    /** @var array */
     protected $ApiKeys;
+
+    /** @var array */
     protected $Tags;
 
     public function formatForPatch()
@@ -22,9 +27,8 @@ class Account extends Entity
         return json_encode($this->Account);
     }
 
-    public function foreignKeyEntityMap()
+    public function foreignKeyEntityMap(): array
     {
-        return array(
-        );
+        return [];
     }
 }

@@ -3,49 +3,64 @@
 namespace PrintNode;
 
 /**
- * Request
+ * Request.
  *
  * HTTP request object.
  *
  * @method Computer[] getComputers() getComputers(int $computerId)
- * @method Printer[] getPrinters() getPrinters(int $printerId)
+ * @method Printer[]  getPrinters() getPrinters(int $printerId)
  * @method PrintJob[] getPrintJobs() getPrintJobs(int $printJobId)
  */
 class Request
 {
     /**
-     * Credentials to use when communicating with API
+     * Credentials to use when communicating with API.
+     *
      * @var Credentials
      */
     private $credentials;
+
     /**
-     * API url to use with the client
+     * API url to use with the client.
+     *
      * @var string
-     * */
-    private $apiurl = "https://api.printnode.com";
+     */
+    private $apiurl = 'https://api.printnode.com';
+
     /**
-     * Header for child authentication
+     * Header for child authentication.
+     *
      * @var string[]
-     * */
-    private $childauth = array();
+     */
+    private $childauth = [];
+
     /**
-     * Offset query argument on GET requests
+     * Offset query argument on GET requests.
+     *
      * @var int
      */
     private $offset = 0;
 
     /**
-     * Limit query argument on GET requests
+     * Limit query argument on GET requests.
+     *
      * @var mixed
      */
     private $limit = 10;
 
     /**
-     * Map entity names to API URLs
+     * The time until timeout when making a request.
+     *
+     * @var int
+     */
+    private $timeout = 4;
+
+    /**
+     * Map entity names to API URLs.
+     *
      * @var string[]
      */
-
-    private $endPointUrls = array(
+    private $endPointUrls = [
         'PrintNode\Client' => '/download/clients',
         'PrintNode\Download' => '/download/client',
         'PrintNode\ApiKey' => '/account/apikey',
@@ -55,13 +70,15 @@ class Request
         'PrintNode\Computer' => '/computers',
         'PrintNode\Printer' => '/printers',
         'PrintNode\PrintJob' => '/printjobs',
-    );
+        'PrintNode\Scale' => '/scale',
+    ];
 
     /**
-     * Map method names used by __call to entity names
+     * Map method names used by __call to entity names.
+     *
      * @var string[]
      */
-    private $methodNameEntityMap = array(
+    private $methodNameEntityMap = [
         'Clients' => 'PrintNode\Client',
         'Downloads' => 'PrintNode\Download',
         'ApiKeys' => 'PrintNode\ApiKey',
@@ -71,20 +88,22 @@ class Request
         'Computers' => 'PrintNode\Computer',
         'Printers' => 'PrintNode\Printer',
         'PrintJobs' => 'PrintNode\PrintJob',
-    );
+    ];
 
     /**
-     * Constructor
+     * Constructor.
+     *
      * @param Credentials $credentials
-     * @param mixed $endPointUrls
-     * @param mixed $methodNameEntityMap
-     * @param int $offset
-     * @param int $limit
+     * @param mixed       $endPointUrls
+     * @param mixed       $methodNameEntityMap
+     * @param int         $offset
+     * @param int         $limit
+     *
      * @return Request
      */
-    public function __construct(Credentials $credentials, array $endPointUrls = array(), array $methodNameEntityMap = array(), $offset = 0, $limit = 10)
+    public function __construct(Credentials $credentials, array $endPointUrls = [], array $methodNameEntityMap = [], $offset = 0, $limit = 10)
     {
-        if (!function_exists('curl_init')) {
+        if (! function_exists('curl_init')) {
             throw new \RuntimeException('Function curl_init does not exist.');
         }
 
@@ -104,15 +123,15 @@ class Request
         $this->setLimit($limit);
     }
 
-
     /**
-     * Get API EndPoint URL from an entity name
+     * Get API EndPoint URL from an entity name.
+     *
      * @param mixed $entityName
+     *
      * @return string
      */
     private function makeEndPointUrls()
     {
-        $endPointUrls;
         foreach ($this->methodNameEntityMap as $classes) {
             $endPointUrls[$classes] = $this->apiurl.$this->endPointUrls[$classes];
         }
@@ -121,7 +140,7 @@ class Request
 
     private function getEndPointUrl($entityName)
     {
-        if (!isset($this->endPointUrls[$entityName])) {
+        if (! isset($this->endPointUrls[$entityName])) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Missing endPointUrl for entityName "%s"',
@@ -134,13 +153,15 @@ class Request
     }
 
     /**
-     * Get entity name from __call method name
+     * Get entity name from __call method name.
+     *
      * @param mixed $methodName
+     *
      * @return string
      */
     private function getEntityName($methodName)
     {
-        if (!preg_match('/^get(.+)$/', $methodName, $matchesArray)) {
+        if (! preg_match('/^get(.+)$/', $methodName, $matchesArray)) {
             throw new \BadMethodCallException(
                 sprintf(
                     'Method %s::%s does not exist',
@@ -150,7 +171,7 @@ class Request
             );
         }
 
-        if (!isset($this->methodNameEntityMap[$matchesArray[1]])) {
+        if (! isset($this->methodNameEntityMap[$matchesArray[1]])) {
             throw new \BadMethodCallException(
                 sprintf(
                     '%s is missing an methodNameMap entry for %s',
@@ -166,7 +187,9 @@ class Request
     /**
      * Initialise cURL with the options we need
      * to communicate successfully with API URL.
+     *
      * @param void
+     *
      * @return resource
      */
     private function curlInit()
@@ -179,12 +202,12 @@ class Request
         curl_setopt($curlHandle, CURLOPT_VERBOSE, false);
         curl_setopt($curlHandle, CURLOPT_HEADER, true);
 
-        curl_setopt($curlHandle, CURLOPT_USERPWD, (string)$this->credentials);
+        curl_setopt($curlHandle, CURLOPT_USERPWD, (string) $this->credentials);
 
         curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
 
-		curl_setopt($curlHandle, CURLOPT_TIMEOUT, 4);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, $this->timeout);
 
         curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
 
@@ -192,12 +215,14 @@ class Request
     }
 
     /**
-     * Execute cURL request using the specified API EndPoint
+     * Execute cURL request using the specified API EndPoint.
+     *
      * @param mixed $curlHandle
      * @param mixed $endPointUrl
+     *
      * @return Response
      */
-    private function curlExec($curlHandle, $endPointUrl)
+    private function curlExec($curlHandle, $endPointUrl): Response
     {
         curl_setopt($curlHandle, CURLOPT_URL, $endPointUrl);
 
@@ -211,7 +236,7 @@ class Request
             );
         }
 
-		curl_close($curlHandle);
+        curl_close($curlHandle);
 
         $response_parts = explode("\r\n\r\n", $response);
 
@@ -223,8 +248,10 @@ class Request
     }
 
     /**
-     * Make a GET request using cURL
+     * Make a GET request using cURL.
+     *
      * @param mixed $endPointUrl
+     *
      * @return Response
      */
     private function curlGet($endPointUrl)
@@ -253,14 +280,16 @@ class Request
 
     /**
      * Apply offset and limit to a end point URL.
+     *
      * @param mixed $endPointUrl
+     *
      * @return string
      */
     private function applyOffsetLimit($endPointUrl)
     {
         $endPointUrlArray = parse_url($endPointUrl);
 
-        if (!isset($endPointUrlArray['query'])) {
+        if (! isset($endPointUrlArray['query'])) {
             $endPointUrlArray['query'] = null;
         }
 
@@ -272,18 +301,20 @@ class Request
         $endPointUrlArray['query'] = http_build_query($queryStringArray, null, '&');
 
         $endPointUrl = (isset($endPointUrlArray['scheme'])) ? "{$endPointUrlArray['scheme']}://" : '';
-        $endPointUrl.= (isset($endPointUrlArray['host'])) ? "{$endPointUrlArray['host']}" : '';
-        $endPointUrl.= (isset($endPointUrlArray['port'])) ? ":{$endPointUrlArray['port']}" : '';
-        $endPointUrl.= (isset($endPointUrlArray['path'])) ? "{$endPointUrlArray['path']}" : '';
-        $endPointUrl.= (isset($endPointUrlArray['query'])) ? "?{$endPointUrlArray['query']}" : '';
+        $endPointUrl .= (isset($endPointUrlArray['host'])) ? "{$endPointUrlArray['host']}" : '';
+        $endPointUrl .= (isset($endPointUrlArray['port'])) ? ":{$endPointUrlArray['port']}" : '';
+        $endPointUrl .= (isset($endPointUrlArray['path'])) ? "{$endPointUrlArray['path']}" : '';
+        $endPointUrl .= (isset($endPointUrlArray['query'])) ? "?{$endPointUrlArray['query']}" : '';
 
         return $endPointUrl;
     }
 
     /**
-     * Make a POST/PUT/DELETE request using cURL
+     * Make a POST/PUT/DELETE request using cURL.
+     *
      * @param Entity $entity
-     * @param mixed $httpMethod
+     * @param mixed  $httpMethod
+     *
      * @return Response
      */
     private function curlSend()
@@ -299,21 +330,23 @@ class Request
         $curlHandle = $this->curlInit();
 
         curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, $httpMethod);
-        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, (string)$data);
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json'), $this->childauth));
+        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, (string) $data);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array_merge(['Content-Type: application/json'], $this->childauth));
 
         return $this->curlExec(
             $curlHandle,
             $endPointUrl
         );
     }
+
     /**
-     * Set the offset for GET requests
+     * Set the offset for GET requests.
+     *
      * @param mixed $offset
      */
     public function setOffset($offset)
     {
-        if (!ctype_digit($offset) && !is_int($offset)) {
+        if (! ctype_digit($offset) && ! is_int($offset)) {
             throw new \InvalidArgumentException('offset should be a number');
         }
 
@@ -321,12 +354,13 @@ class Request
     }
 
     /**
-     * Set the limit for GET requests
+     * Set the limit for GET requests.
+     *
      * @param mixed $limit
      */
     public function setLimit($limit)
     {
-        if (!ctype_digit($limit) && !is_int($limit)) {
+        if (! ctype_digit($limit) && ! is_int($limit)) {
             throw new \InvalidArgumentException('limit should be a number');
         }
 
@@ -334,13 +368,15 @@ class Request
     }
 
     /**
-     * Delete an ApiKey for a child account
+     * Delete an ApiKey for a child account.
+     *
      * @param string $apikey
+     *
      * @return Response
      * */
     public function deleteApiKey($apikey)
     {
-        $endPointUrl = $this->apiurl."/account/apikey/".$apikey;
+        $endPointUrl = $this->apiurl.'/account/apikey/'.$apikey;
 
         $response = $this->curlDelete($endPointUrl);
 
@@ -348,13 +384,15 @@ class Request
     }
 
     /**
-     * Delete a tag for a child account
+     * Delete a tag for a child account.
+     *
      * @param string $tag
+     *
      * @return Response
      * */
     public function deleteTag($tag)
     {
-        $endPointUrl = $this->apiurl."/account/tag/".$tag;
+        $endPointUrl = $this->apiurl.'/account/tag/'.$tag;
 
         $response = $this->curlDelete($endPointUrl);
 
@@ -364,11 +402,12 @@ class Request
     /**
      * Delete a child account
      * MUST have $this->childauth set to run.
+     *
      * @return Response
      * */
     public function deleteAccount()
     {
-        if (!isset($this->childauth)) {
+        if (! isset($this->childauth)) {
             throw new Exception(
                 sprintf(
                     'No child authentication set - cannot delete your own account.'
@@ -376,7 +415,7 @@ class Request
             );
         }
 
-        $endPointUrl = $this->apiurl."/account/";
+        $endPointUrl = $this->apiurl.'/account/';
 
         $response = $this->curlDelete($endPointUrl);
 
@@ -385,14 +424,16 @@ class Request
 
     /**
      * Returns a client key.
+     *
      * @param string $uuid
      * @param string $edition
      * @param string $version
+     *
      * @return Resposne
      * */
     public function getClientKey($uuid, $edition, $version)
     {
-        $endPointUrl = $this->apiurl."/client/key/".$uuid."?edition=".$edition."&version=".$version;
+        $endPointUrl = $this->apiurl.'/client/key/'.$uuid.'?edition='.$edition.'&version='.$version;
 
         $response = $this->curlGet($endPointUrl);
 
@@ -401,7 +442,9 @@ class Request
 
     /**
      * Gets print job states.
-     * @param string $printjobId OPTIONAL:if unset gives states relative to all printjobs.
+     *
+     * @param string $printjobId OPTIONAL:if unset gives states relative to all printjobs
+     *
      * @return Entity[]
      * */
     public function getPrintJobStates()
@@ -416,13 +459,13 @@ class Request
             );
         }
 
-        $endPointUrl = $this->apiurl."/printjobs/";
+        $endPointUrl = $this->apiurl.'/printjobs/';
 
         if (count($arguments) == 0) {
-            $endPointUrl.= 'states/';
+            $endPointUrl .= 'states/';
         } else {
             $arg_1 = array_shift($arguments);
-            $endPointUrl.= $arg_1.'/states/';
+            $endPointUrl .= $arg_1.'/states/';
         }
 
         $response = $this->curlGet($endPointUrl);
@@ -440,11 +483,12 @@ class Request
         return Entity::makeFromResponse("PrintNode\State", json_decode($response->getContent()));
     }
 
-
     /**
      * Gets PrintJobs relative to a printer.
+     *
      * @param string $printerIdSet set of printer ids to find PrintJobs relative to
-     * @param string $printJobId OPTIONAL: set of PrintJob ids relative to the printer.
+     * @param string $printJobId   OPTIONAL: set of PrintJob ids relative to the printer
+     *
      * @return Entity[]
      * */
     public function getPrintJobsByPrinters()
@@ -459,14 +503,14 @@ class Request
             );
         }
 
-        $endPointUrl = $this->apiurl."/printers/";
+        $endPointUrl = $this->apiurl.'/printers/';
 
         $arg_1 = array_shift($arguments);
 
-        $endPointUrl.= $arg_1.'/printjobs/';
+        $endPointUrl .= $arg_1.'/printjobs/';
 
         foreach ($arguments as $argument) {
-            $endPointUrl.= $argument;
+            $endPointUrl .= $argument;
         }
 
         $response = $this->curlGet($endPointUrl);
@@ -486,17 +530,28 @@ class Request
 
     /**
      * Gets scales relative to a computer.
+     *
      * @param string $computerId id of computer to find scales
+     *
      * @return Entity[]
      * */
-    public function getScales($computerId)
+    public function getScales(string $computerId, string $deviceName = null, int $deviceNumber = null)
     {
-        $endPointUrl = $this->apiurl."/computer/";
-        $endPointUrl.= $computerId;
-        $endPointUrl.= '/scales';
+        // set default api call
+        $endPointUrl = sprintf('%s/computer/%s/scales', $this->apiUrl, $computerId);
 
+        if ($deviceName) {
+            // get scales for a specific device
+            $endPointUrl = sprintf('%s/computer/%s/scales/%s', $this->apiUrl, $computerId, $deviceName);
+        }
+
+        if ($deviceName && $deviceNumber) {
+            // get scales for a specific device and device number
+            $endPointUrl = sprintf('%s/computer/%s/scale/%s/%s', $this->apiUrl, $computerId, $deviceName, $deviceNumber);
+        }
+
+        // execute the api call
         $response = $this->curlGet($endPointUrl);
-
 
         if ($response->getStatusCode() != '200') {
             throw new \RuntimeException(
@@ -513,8 +568,10 @@ class Request
 
     /**
      * Get printers relative to a computer.
+     *
      * @param string $computerIdSet set of computer ids to find printers relative to
-     * @param string $printerIdSet OPTIONAL: set of printer ids only found in the set of computers.
+     * @param string $printerIdSet  OPTIONAL: set of printer ids only found in the set of computers
+     *
      * @return Entity[]
      * */
     public function getPrintersByComputers()
@@ -529,14 +586,14 @@ class Request
             );
         }
 
-        $endPointUrl = $this->apiurl."/computers/";
+        $endPointUrl = $this->apiurl.'/computers/';
 
         $arg_1 = array_shift($arguments);
 
-        $endPointUrl.= $arg_1.'/printers/';
+        $endPointUrl .= $arg_1.'/printers/';
 
         foreach ($arguments as $argument) {
-            $endPointUrl.= $argument;
+            $endPointUrl .= $argument;
         }
 
         $response = $this->curlGet($endPointUrl);
@@ -555,9 +612,11 @@ class Request
     }
 
     /**
-     * Map method names getComputers, getPrinters and getPrintJobs to entities
+     * Map method names getComputers, getPrinters and getPrintJobs to entities.
+     *
      * @param mixed $methodName
      * @param mixed $arguments
+     *
      * @return Entity[]
      */
     public function __call($methodName, $arguments)
@@ -569,7 +628,7 @@ class Request
         if (count($arguments) > 0) {
             $arguments = array_shift($arguments);
 
-            if (!is_string($arguments)) {
+            if (! is_string($arguments)) {
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Invalid argument type passed to %s. Expecting a string got %s',
@@ -607,13 +666,15 @@ class Request
     }
 
     /**
-     * PATCH (update) the specified entity
+     * PATCH (update) the specified entity.
+     *
      * @param Entity $entity
+     *
      * @return Response
      * */
     public function patch(Entity $entity)
     {
-        if (!($entity instanceof Entity)) {
+        if (! ($entity instanceof Entity)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Invalid argument type passed to patch. Expecting Entity got %s',
@@ -625,25 +686,26 @@ class Request
         $endPointUrl = $this->getEndPointUrl(get_class($entity));
 
         if (method_exists($entity, 'endPointUrlArg')) {
-            $endPointUrl.= '/'.$entity->endPointUrlArg();
+            $endPointUrl .= '/'.$entity->endPointUrlArg();
         }
 
         if (method_exists($entity, 'formatForPatch')) {
             $entity = $entity->formatForPatch();
         }
 
-
         return $this->curlSend('PATCH', $entity, $endPointUrl);
     }
 
     /**
-     * POST (create) the specified entity
+     * Print the entity.
+     *
      * @param Entity $entity
+     *
      * @return Response
      */
     public function post(Entity $entity)
     {
-        if (!($entity instanceof Entity)) {
+        if (! ($entity instanceof Entity)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Invalid argument type passed to patch. Expecting Entity got %s',
@@ -655,19 +717,21 @@ class Request
         $endPointUrl = $this->getEndPointUrl(get_class($entity));
 
         if (method_exists($entity, 'endPointUrlArg')) {
-            $endPointUrl.= '/'.$entity->endPointUrlArg();
-		}
+            $endPointUrl .= '/'.$entity->endPointUrlArg();
+        }
 
-		if (method_exists($entity, 'formatForPost')){
-			$entity = $entity->formatForPost();
-		}
+        if (method_exists($entity, 'formatForPost')) {
+            $entity = $entity->formatForPost();
+        }
 
         return $this->curlSend('POST', $entity, $endPointUrl);
     }
 
     /**
-     * PUT (update) the specified entity
+     * PUT (update) the specified entity.
+     *
      * @param Entity $entity
+     *
      * @return Response
      */
     public function put()
@@ -676,7 +740,7 @@ class Request
 
         $entity = array_shift($arguments);
 
-        if (!($entity instanceof Entity)) {
+        if (! ($entity instanceof Entity)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Invalid argument type passed to patch. Expecting Entity got %s',
@@ -688,15 +752,17 @@ class Request
         $endPointUrl = $this->getEndPointUrl(get_class($entity));
 
         foreach ($arguments as $argument) {
-            $endPointUrl.= '/'.$argument;
+            $endPointUrl .= '/'.$argument;
         }
 
         return $this->curlSend('PUT', $entity, $endPointUrl);
     }
 
     /**
-     * DELETE (delete) the specified entity
+     * DELETE (delete) the specified entity.
+     *
      * @param Entity $entity
+     *
      * @return Response
      */
     public function delete(Entity $entity)
@@ -704,7 +770,7 @@ class Request
         $endPointUrl = $this->getEndPointUrl(get_class($entity));
 
         if (method_exists($entity, 'endPointUrlArg')) {
-            $endPointUrl.= '/'.$entity->endPointUrlArg();
+            $endPointUrl .= '/'.$entity->endPointUrlArg();
         }
 
         return $this->curlDelete($endPointUrl);
@@ -712,16 +778,32 @@ class Request
 
     public function setChildAccountById($id)
     {
-        $this->childauth = array("X-Child-Account-By-Id: ".$id);
+        $this->childauth = ['X-Child-Account-By-Id: '.$id];
     }
 
     public function setChildAccountByEmail($email)
     {
-        $this->childauth = array("X-Child-Account-By-Email: ".$email);
+        $this->childauth = ['X-Child-Account-By-Email: '.$email];
     }
 
     public function setChildAccountByCreatorRef($creatorRef)
     {
-        $this->childauth = array("X-Child-Account-By-CreatorRef: ".$creatorRef);
+        $this->childauth = ['X-Child-Account-By-CreatorRef: '.$creatorRef];
+    }
+
+    // Setters and helpers
+
+    /**
+     * Set the timeout for api calls.
+     *
+     * @param int $timeout
+     *
+     * @return self
+     */
+    public function setTimeout(int $timeout): self
+    {
+        $this->timeout = $timeout;
+
+        return $this;
     }
 }

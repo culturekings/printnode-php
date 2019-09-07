@@ -3,34 +3,49 @@
 namespace PrintNode;
 
 /**
- * Printer
+ * Printer.
  *
  * Object representing a Printer in PrintNode API
  *
- * @property-read int $id
- * @property-read Computer $computer
- * @property-read string $name
- * @property-read string $description
- * @property-read object $capabilities
- * @property-read boolean $default
- * @property-read DateTime $createTimestamp
- * @property-read string $state
+ * @property int      $id
+ * @property Computer $computer
+ * @property string   $name
+ * @property string   $description
+ * @property object   $capabilities
+ * @property bool     $default
+ * @property DateTime $createTimestamp
+ * @property string   $state
  */
 class Printer extends Entity
 {
+    /** @var int */
     protected $id;
+
+    /** @var Computer */
     protected $computer;
+
+    /** @var string */
     protected $name;
+
+    /** @var string */
     protected $description;
+
+    /** @var object */
     protected $capabilities;
+
+    /** @var bool */
     protected $default;
+
+    /** @var DateTime */
     protected $createTimestamp;
+
+    /** @var string */
     protected $state;
 
-    public function foreignKeyEntityMap()
+    public function foreignKeyEntityMap(): array
     {
-        return array(
-            'computer' => 'PrintNode\Computer'
-        );
+        return [
+            'computer' => 'PrintNode\Computer',
+        ];
     }
 }

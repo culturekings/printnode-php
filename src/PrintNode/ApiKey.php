@@ -3,24 +3,24 @@
 namespace PrintNode;
 
 /**
- * ApiKey
+ * ApiKey.
  *
  * Object representing an ApiKey for POST in PrintNode API
  *
- * @property-read string $description
+ * @property string $description
  */
 class ApiKey extends Entity
 {
+    /** @var string */
     protected $description;
 
-    public function endPointUrlArg()
+    public function endPointUrlArg(): ?string
     {
         return $this->description;
     }
 
-    public function foreignKeyEntityMap()
+    public function foreignKeyEntityMap(): array
     {
-        return array(
-        );
+        return [];
     }
 }

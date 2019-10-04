@@ -3,8 +3,7 @@
   "description": "Connect any printer to your application with PrintNode Client and easy to use JSON API",
   "require": {
     "php": "> 7.1.3",
-    "ext-curl": "*",
-    "codeception/codeception": "^3.1"
+    "ext-curl": "*"
   },
   "keywords": [
     "php",
@@ -22,7 +21,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "PrintNode\\": "src/PrintNode"
+      "CultureKings\\PrintNode\\": "src/PrintNode"
     }
   }
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace PrintNode;
+namespace CultureKings\PrintNode;
 
 /**
- * Download.
+ * Client.
  *
- * Object representing a Download Client in PrintNode API
+ * Object representing a Client in PrintNode API
  *
- *
+ * @property int      $id
+ * @property bool     $enabled
  * @property string   $edition
  * @property string   $version
  * @property string   $os
@@ -17,8 +18,14 @@ namespace PrintNode;
  * @property DateTime $releaseTimestamp
  * @property string   $url
  */
-class Download extends Entity
+class Client extends Entity
 {
+    /** @var int */
+    protected $id;
+
+    /** @var bool */
+    protected $enabled;
+
     /** @var string */
     protected $edition;
 
@@ -42,6 +49,16 @@ class Download extends Entity
 
     /** @var string */
     protected $url;
+
+    public function formatForPatch(): string
+    {
+        return json_encode(['enabled' => $this->enabled]);
+    }
+
+    public function endPointUrlArg(): ?string
+    {
+        return (string) $this->id;
+    }
 
     public function foreignKeyEntityMap(): array
     {

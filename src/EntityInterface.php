@@ -1,6 +1,6 @@
 <?php
 
-namespace PrintNode;
+namespace CultureKings\PrintNode;
 
 interface EntityInterface
 {
